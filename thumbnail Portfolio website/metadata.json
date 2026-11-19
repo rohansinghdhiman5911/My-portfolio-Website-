@@ -1,0 +1,6 @@
+{
+  "name": "RohanDesigns",
+  "description": "A modern dark-themed portfolio website for a professional thumbnail designer featuring a gallery with image upload, admin login, category filters, pricing, testimonials, contact form, and direct WhatsApp ordering backed by Firebase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,325 @@
+import express from "express";
+import path from "path";
+import { db } from "./src/db/index.ts";
+import { thumbnails as thumbnailsTable, inquiries as inquiriesTable, visitors as visitorsTable, reviews as reviewsTable } from "./src/db/schema.ts";
+import { eq, desc } from "drizzle-orm";
+
+const app = express();
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Increase body size limits to support direct Base64 uploaded images (e.g. Canva built PNGs)
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+// API Endpoints
+// --- Thumbnails ---
+app.get("/api/thumbnails", async (req, res) => {
+  try {
+    const data = await db.select().from(thumbnailsTable).orderBy(desc(thumbnailsTable.createdAt));
+    res.json(data);
+  } catch (error: any) {
+    console.error("Error fetching thumbnails:", error);
+    res.status(500).json({ error: "Failed to fetch thumbnails from database." });
+  }
+});
+
+app.post("/api/thumbnails", async (req, res) => {
+  try {
+    const { title, category, imageUrl, description } = req.body;
+    if (!title || !category || !imageUrl) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const newId = "custom_" + Date.now();
+    const [inserted] = await db.insert(thumbnailsTable).values({
+      id: newId,
+      title,
+      category,
+      imageUrl,
+      description: description || "",
+      isCustom: true,
+    }).returning();
+    res.status(201).json(inserted);
+  } catch (error: any) {
+    console.error("Error inserting thumbnail:", error);
+    res.status(500).json({ error: "Failed to save thumbnail to database." });
+  }
+});
+
+app.delete("/api/thumbnails/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.delete(thumbnailsTable).where(eq(thumbnailsTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting thumbnail:", error);
+    res.status(500).json({ error: "Failed to delete thumbnail from database." });
+  }
+});
+
+// --- Inquiries ---
+app.get("/api/inquiries/track", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query || typeof query !== "string") {
+      return res.status(400).json({ error: "Search query is required" });
+    }
+    const trimmed = query.trim().toLowerCase();
+    const all = await db.select().from(inquiriesTable);
+    const matched = all.filter(
+      (inq) =>
+        inq.id.toLowerCase() === trimmed ||
+        inq.email.toLowerCase() === trimmed
+    );
+    if (matched.length === 0) {
+      return res.status(404).json({ error: "No orders found. Please check your spelling or Order ID." });
+    }
+    const publicData = matched.map((inq) => ({
+      id: inq.id,
+      name: inq.name,
+      channelName: inq.channelName,
+      packageType: inq.packageType,
+      status: inq.status,
+      liveInfo: inq.liveInfo,
+      createdAt: inq.createdAt,
+    }));
+    res.json(publicData);
+  } catch (error: any) {
+    console.error("Error tracking inquiry:", error);
+    res.status(500).json({ error: "Failed to search order status." });
+  }
+});
+
+app.get("/api/inquiries", async (req, res) => {
+  try {
+    const data = await db.select().from(inquiriesTable);
+    res.json(data);
+  } catch (error: any) {
+    console.error("Error fetching inquiries:", error);
+    res.status(500).json({ error: "Failed to fetch inquiries from database." });
+  }
+});
+
+app.post("/api/inquiries", async (req, res) => {
+  try {
+    const { name, email, whatsapp, channelName, category, packageType, details } = req.body;
+    if (!name || !email || !channelName || !category || !packageType) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const newId = "inq_" + Date.now();
+    const [inserted] = await db.insert(inquiriesTable).values({
+      id: newId,
+      name,
+      email,
+      whatsapp,
+      channelName,
+      category,
+      packageType,
+      details: details || "",
+      status: "new",
+      createdAt: formattedDate,
+    }).returning();
+    res.status(201).json(inserted);
+  } catch (error: any) {
+    console.error("Error inserting inquiry:", error);
+    res.status(500).json({ error: "Failed to save inquiry to database." });
+  }
+});
+
+app.patch("/api/inquiries/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, liveInfo } = req.body;
+    
+    const updateData: any = {};
+    if (status !== undefined) updateData.status = status;
+    if (liveInfo !== undefined) updateData.liveInfo = liveInfo;
+ 
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "Missing fields to update (status or liveInfo)" });
+    }
+
+    await db.update(inquiriesTable).set(updateData).where(eq(inquiriesTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Error updating inquiry:", error);
+    res.status(500).json({ error: "Failed to update inquiry in database." });
+  }
+});
+
+app.delete("/api/inquiries/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.delete(inquiriesTable).where(eq(inquiriesTable.id, id));
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting inquiry:", error);
+    res.status(500).json({ error: "Failed to delete inquiry from database." });
+  }
+});
+
+// --- Analytics Visitor Counter ---
+app.post("/api/analytics/hit", async (req, res) => {
+  try {
+    const { visitorId } = req.body;
+    if (!visitorId) {
+      return res.status(400).json({ error: "visitorId is required" });
+    }
+
+    // Check if this visitor is already registered
+    const existing = await db.select().from(visitorsTable).where(eq(visitorsTable.id, visitorId)).limit(1);
+    
+    if (existing.length === 0) {
+      const ip = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "";
+      const userAgent = req.headers["user-agent"] || "";
+      await db.insert(visitorsTable).values({
+        id: visitorId,
+        ip: ip.substring(0, 255),
+        userAgent: userAgent.substring(0, 500),
+      });
+    }
+
+    // Get the total unique count
+    const allVisitors = await db.select().from(visitorsTable);
+    res.json({
+      totalVisitors: allVisitors.length,
+    });
+  } catch (error: any) {
+    console.error("Error logging visitor hit:", error);
+    res.status(500).json({ error: "Failed to record analytics hit" });
+  }
+});
+
+// --- Client Reviews ---
+app.get("/api/reviews", async (req, res) => {
+  try {
+    const data = await db.select().from(reviewsTable).orderBy(desc(reviewsTable.createdAt));
+    res.json(data);
+  } catch (error: any) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ error: "Failed to fetch client reviews." });
+  }
+});
+
+app.post("/api/reviews", async (req, res) => {
+  try {
+    const { name, channelName, rating, review, ctrBoost } = req.body;
+    if (!name || !review) {
+      return res.status(400).json({ error: "Name and Review are required" });
+    }
+    const validatedRating = typeof rating === "number" ? Math.max(1, Math.min(5, rating)) : 5;
+    
+    const [inserted] = await db.insert(reviewsTable).values({
+      name,
+      channelName: channelName || "",
+      rating: validatedRating,
+      review,
+      ctrBoost: ctrBoost || "",
+    }).returning();
+
+    res.status(201).json(inserted);
+  } catch (error: any) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ error: "Failed to submit review." });
+  }
+});
+
+// Start dev or production server with Vite middleware integration
+async function startServer() {
+  // Clear any existing fake/pre-seeded thumbnails to respect user request of removing fake portfolio
+  try {
+    await db.delete(thumbnailsTable).where(eq(thumbnailsTable.isCustom, false));
+    console.log("Cleaned up fake non-custom thumbnails from database.");
+  } catch (error) {
+    console.error("Error cleaning up fake thumbnails:", error);
+  }
+
+  try {
+    const existingInquiries = await db.select().from(inquiriesTable).limit(1);
+    if (existingInquiries.length === 0) {
+      console.log("Database inquiries table is empty. Seeding seed inquiries...");
+      const seedInquiries = [
+        {
+          id: 'seed_inq_1',
+          name: 'GamerPro YT',
+          email: 'contact@gamerpro.com',
+          whatsapp: '919876543210',
+          channelName: 'GamerPro',
+          category: 'gaming',
+          packageType: 'Starter Booster Pack',
+          details: 'Looking for an ultra-aggressive high-CTR gaming thumbnail for my Cyberpunk 2077 playthrough video. Need neon text and character focus.',
+          status: 'completed' as const,
+          createdAt: 'Jul 10, 2026, 02:45 PM'
+        },
+        {
+          id: 'seed_inq_2',
+          name: 'Sarah Chen',
+          email: 'sarah@gearunboxed.com',
+          whatsapp: '919876543211',
+          channelName: 'GearUnboxed',
+          category: 'tech',
+          packageType: 'Weekly Creator Pack',
+          details: 'Need 12 custom thumbnails for our next smart VR glasses series. Sleek, high-contrast, modern layout with real device highlights.',
+          status: 'completed' as const,
+          createdAt: 'Jul 12, 2026, 11:15 AM'
+        },
+        {
+          id: 'seed_inq_3',
+          name: 'WealthMind Creator',
+          email: 'info@wealthmind.com',
+          whatsapp: '919876543212',
+          channelName: 'WealthMind',
+          category: 'business',
+          packageType: 'Custom Special Order',
+          details: 'Requesting a business/finance thumbnail. "The Real Reason the Financial System is Changing This Year". Use elegant styling, high-contrast charts, and clear typography.',
+          status: 'new' as const,
+          createdAt: 'Jul 16, 2026, 06:20 PM'
+        },
+        {
+          id: 'seed_inq_4',
+          name: 'Science Pulse Team',
+          email: 'hello@sciencepulse.org',
+          whatsapp: '919876543213',
+          channelName: 'Science Pulse',
+          category: 'education',
+          packageType: 'Starter Booster Pack',
+          details: 'Edutainment thumbnail for a nuclear fusion video. Dynamic graphic showing molecules joining, clean mono-spaced accent tags.',
+          status: 'contacted' as const,
+          createdAt: 'Jul 17, 2026, 08:30 AM'
+        }
+      ];
+      await db.insert(inquiriesTable).values(seedInquiries);
+      console.log("Successfully seeded inquiries into database!");
+    }
+  } catch (error) {
+    console.error("Error checking or seeding database:", error);
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+startServer();

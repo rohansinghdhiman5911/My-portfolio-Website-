@@ -1,0 +1,112 @@
+================================================================================
+          COMMERCIAL SOFTWARE LICENSE AGREEMENT & DISTRIBUTION TERMS
+================================================================================
+
+Product Name: RohanThumbnail White-Label Thumbnail Business Platform
+Distributor/Creator: Rohan Thumbnail Booster Pack (Platform Developers)
+Licensed Software Product: Full-Stack React + Node.js Web Application Portfolio
+
+This Commercial Software License Agreement ("Agreement") is a legal agreement
+between you (either an individual developer, agency, or single business entity, 
+referred to as "Licensee") and the Distributor/Creator of RohanThumbnail 
+("Licensor"). By purchasing, downloading, installing, copying, or otherwise 
+using this Software Product, you agree to be bound by the terms of this Agreement.
+
+--------------------------------------------------------------------------------
+1. PRODUCT DESCRIPTION
+--------------------------------------------------------------------------------
+The Licensed Software is a full-stack React + Node.js business application.
+The package contains:
+  - Dynamic Thumbnail Upload & Portfolio Presentation System
+  - Real-time Client Order Management & Inquiry Systems
+  - Interactive WhatsApp Custom Messaging Integration
+  - Live Order Delivery Tracking System (with Real-time Step Updates)
+  - Admin Analytical Dashboard & Content Modification Interface
+  - Customer Feedback & Review Rating Management Engine
+  - Independent Database Setup Wizard for automatic schema creation
+  - Complete White-label asset/branding customization support
+
+--------------------------------------------------------------------------------
+2. OWNERSHIP & COPYRIGHT NOTICE
+--------------------------------------------------------------------------------
+- Licensor retains all ownership, copyright, and distribution rights of the 
+  core source code template and overall compiled Software package.
+- The Software has been developed with AI-assisted software engines and may
+  contain third-party open-source libraries or components (such as React, 
+  Express, PostgreSQL, Drizzle ORM, Tailwind CSS, Lucide icons, Recharts, and 
+  related NPM packages). All such third-party components remain subject to 
+  their respective open-source licensing agreements.
+- This software is protected by copyright laws and international treaty provisions.
+
+--------------------------------------------------------------------------------
+3. BUYER RIGHTS (PERMITTED USAGE & MODIFICATION)
+--------------------------------------------------------------------------------
+Subject to the license tier purchased (defined in Section 5), Licensee is 
+granted a non-exclusive, non-transferable, commercial license to:
+  - Deploy and run the Software live on a host server or cloud provider for 
+    business operations.
+  - Modify the branding, logos, assets, business names, contact details, prices,
+    colors, and styling.
+  - Connect the Software to an independent, self-hosted PostgreSQL database.
+  - Alter, customize, add, or rewrite the core source code to fit specific 
+    commercial layout and utility needs.
+
+--------------------------------------------------------------------------------
+4. RESTRICTIONS
+--------------------------------------------------------------------------------
+Licensee is strictly prohibited from doing the following:
+  - Reselling, redistributing, leasing, licensing, sub-licensing, or sharing 
+    the raw source code of the Software as a standalone file, bundle, template, 
+    or competing digital package.
+  - Claiming original copyright, intellectual authorship, or ownership of the 
+    underlying Software template codebase.
+  - Sharing, leaking, or hosting the purchased source code repository in a 
+    publicly readable repository (e.g., public GitHub repository, public cloud 
+    folder) without password/auth protection.
+  - Duplicating the layout to create unlimited standalone sites for distinct 
+    commercial clients, unless an appropriate Multi-Client/Agency License tier 
+    has been secured.
+
+--------------------------------------------------------------------------------
+5. LICENSE TYPES & TIERS
+--------------------------------------------------------------------------------
+Please check your purchased license receipt to verify which tier applies to you:
+
+[ ] SINGLE BUSINESS LICENSE:
+    Allows deployment of the compiled Software for one (1) single business domain, 
+    brand, or enterprise. The Licensee is authorized to modify assets and codebase 
+    solely for this single enterprise deployment.
+
+[ ] AGENCY / DEVELOPER LICENSE:
+    Allows Licensee (freelancer, developer, or agency) to modify, customize, 
+    and deploy the Software for up to ten (10) separate clients as a completed 
+    client website. The client cannot receive raw editable access to redistribute 
+    the template.
+
+[ ] EXTENDED COMMERCIAL LICENSE:
+    Allows unlimited deployments and full modification. Licensee can use the software 
+    within multiple custom platforms and SaaS setups, provided the underlying source 
+    code is not sold directly as an editable template pack.
+
+--------------------------------------------------------------------------------
+6. DISCLAIMER OF WARRANTY & LIMITATION OF LIABILITY
+--------------------------------------------------------------------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS, COPYRIGHT HOLDERS, OR DISTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, 
+OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, 
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+7. LICENSE VALIDATION & METADATA
+--------------------------------------------------------------------------------
+Please keep a copy of your marketplace receipt alongside this document.
+
+License ID:       [PLACEHOLDER_LICENSE_ID_HERE]
+Purchase Date:    [PLACEHOLDER_PURCHASE_DATE_HERE]
+Buyer Name/Co:    [PLACEHOLDER_BUYER_NAME_HERE]
+
+Copyright (c) 2026 RohanThumbnail Platform. All rights reserved.
+================================================================================
